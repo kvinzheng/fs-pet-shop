@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 'use strict';
 
 var fs = require('fs');
@@ -12,6 +13,7 @@ if (cmd === 'read') {
   fs.readFile(petsPath, 'utf8', function(err, data) {
     if (err) {
       throw err;
+      process.exit(1);
     }
 
     if (!indexR) {
@@ -36,6 +38,7 @@ if (cmd === 'read') {
 
     if (readErr) {
       throw readErr;
+      process.exit(1);
     }
     if (!age || !kind || !name) {
       console.error(`Usage: ${node} ${file} ${cmd} AGE KIND NAME`);
@@ -55,7 +58,6 @@ if (cmd === 'read') {
       if (writeErr) {
         throw writeErr;
       }
-      //console.log(pets);
     });
   });
 }else if(cmd === 'update'){
@@ -79,7 +81,6 @@ if (cmd === 'read') {
     pet['name'] = name;
 
     var update = pets.splice(index,1,pet);
-    console.log(update);
     console.log(pet);
 
     var petsJSON = JSON.stringify(pets);
@@ -89,7 +90,34 @@ if (cmd === 'read') {
       }
     });
   });
-} else {
+}
+else if(cmd === 'destroy'){
+  fs.readFile(petsPath, 'utf8', function(readErr, data){
+    if(readErr){
+      throw readErr;
+      process.exit(1);
+    }
+    var index = process.argv[3];
+
+    if(!index){
+      console.error(`Usage: ${node} ${file} ${cmd} INDEX`);
+      process.exit(1);
+    }
+
+    var pets = JSON.parse(data);
+    var destroy = pets.splice(index,1)[0];
+    console.log(destroy);
+
+    var petsJSON = JSON.stringify(pets);
+    fs.writeFile(petsPath, petsJSON, function(writeErr){
+      if(writeErr){
+        throw writeErr;
+        process.exit(1);
+      }
+    });
+  })
+}
+  else {
   console.error(`Usage: ${node} ${file} [read | create | update | destroy]`);
   process.exit(1);
 }
