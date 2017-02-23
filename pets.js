@@ -7,7 +7,8 @@ var node = path.basename(process.argv[0]);
 var file = path.basename(process.argv[1]);
 var cmd = process.argv[2];
 var indexC1 = process.argv[4];
-
+var indexC2 = process.argv[5];
+var indexC3 = process.argv[6];
 
 if (cmd === 'read') {
   var indexR = process.argv[3];
