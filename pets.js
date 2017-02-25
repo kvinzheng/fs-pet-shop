@@ -2,6 +2,7 @@
 'use strict';
 
 var fs = require('fs');
+var fsp = require('fs-promise');
 var path = require('path');
 var petsPath = './pets.json';
 var node = path.basename(process.argv[0]);
@@ -10,7 +11,7 @@ var cmd = process.argv[2];
 
 if (cmd === 'read') {
   var indexR = process.argv[3];
-  fs.readFile(petsPath, 'utf8', function(err, data) {
+  fsp.readFile(petsPath, 'utf8', function(err, data) {
     if (err) {
       throw err;
       process.exit(1);

@@ -47,7 +47,7 @@ describe('pets bonus expressServer', () => {
           if (err) {
             return done(err);
           }
-
+          console.log("hello world???????????");
           request(app)
             .get('/pets/2')
             .expect('Content-Type', /json/)
