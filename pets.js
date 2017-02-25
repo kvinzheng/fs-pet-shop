@@ -7,6 +7,7 @@ var path = require('path');
 var petsPath = './pets.json';
 var node = path.basename(process.argv[0]);
 var file = path.basename(process.argv[1]);
+
 var cmd = process.argv[2];
 
 if (cmd === 'read') {
