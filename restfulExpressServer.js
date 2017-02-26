@@ -11,23 +11,45 @@ app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 let morgan = require('morgan');
-app.use(morgan('short'));
+app.use(morgan('dev'));
 
-app.get('/pets', function(req, res){
-  fs.readFile(petsPath, 'utf8', function(err, data) {
+
+let basicAuth = require('basic-auth');
+
+let auth = (req, res, next) => {
+   function unauthorized(res) {
+  //  res.set('Content-Type', 'text/plain')
+    res.set('WWW-Authenticate', 'Basic realm="Required"');
+    return res.send(401);
+  };
+
+  let user = basicAuth(req);
+
+  if (!user || !user.name || !user.pass) {
+    return unauthorized(res);
+  };
+
+  if (user.name === 'admin' && user.pass === 'meowmix') {
+    return next();
+  } else {
+    return unauthorized(res);
+  };
+};
+
+app.get('/pets', (req, res) => {
+  fs.readFile(petsPath, 'utf8', (err, data) => {
     if(err) {
-      console.err(err);
+      console.error(err);
       return res.sendStatus(500);
     }
       let pets = JSON.parse(data);
-      res.send(pets);
       res.status(200)
+      res.send(pets);
     });
 });
 
-app.get('/pets/:id', function(req, res){
-    fs.readFile(petsPath, 'utf8', function(err, data) {
-      console.log(typeof data);
+app.get('/pets/:id', (req, res) => {
+    fs.readFile(petsPath, 'utf8', (err, data) => {
       if (err) {
         throw err;
         return res.sendStatus(500);
@@ -37,33 +59,28 @@ app.get('/pets/:id', function(req, res){
       let numberId = parseInt(id);
       let pet = JSON.parse(data)[numberId];
 
-      //console.log(JSON.parse(data));
       if(pet){
-        //res.set('Content-Type', 'application/json');
+        res.set('Content-Type', 'application/json');
         res.contentType('application/json');
         res.status(200);
-        res.json(pet);
+        res.send(pet);
       }
       else if( numberId < 0 || numberId >= JSON.parse(data).length || Number.isNaN(numberId)){
       res.status(404);
       res.contentType("text/plain");
       res.send('Not Found');
-      //res.sendStatus(404);
     }
   });
 });
 
 app.post('/pets', function(req, res) {
-  fs.readFile(petsPath, 'utf8', function(err, data){ //petsPath is a pets.JSON
+  fs.readFile(petsPath, 'utf8', (err, data) => { //petsPath is a pets.JSON
     if (err) {
-      throw err;
+      console.error(err.stack);
       return res.sendStatus(500);
     }
     let pets = JSON.parse(data);
 
-    if(!req.body){
-      return res.sendStatus(404);
-    }
     let nameBody = req.body.name;
     let ageBody = req.body.age;
     let kindBody = req.body.kind;
@@ -75,7 +92,7 @@ app.post('/pets', function(req, res) {
 
     if(nameBody && ageBody && kindBody){
       pets.push(newPet);
-      fs.writeFile('./pets.json', JSON.stringify(pets), function(err){
+      fs.writeFile('./pets.json', JSON.stringify(pets), (err) => {
         res.set('Content-Type', 'application/json');
         res.status(200);
         res.send(newPet);
@@ -90,10 +107,11 @@ app.post('/pets', function(req, res) {
 });
 
 app.patch('/pets/:index',function(req, res){
-  fs.readFile('./pets.json', 'utf8', function(err, data){
+  fs.readFile('./pets.json', 'utf8', (err, data) => {
     console.log('I am here');
     if(err){
       console.error(err.stack);
+      res.sendStatus(500);
     }
     let index  = req.params.index;
     let numberIndex = parseInt(index);
@@ -103,33 +121,33 @@ app.patch('/pets/:index',function(req, res){
     let age = parseInt(req.body.age);
     let kind = req.body.kind;
 
-    let pet = pets[index]
-    if(name){
-      pet.name = name;
+    if(!name && !age && !kind){
+      sendstatus(400);
     }
-    if(age){
-      pet.age = age;
-    }
-    if(kind){
-      pet.kind = kind;
+    else{
+      let pet = pets[index]
+      newPet = {
+        name : name || pet.name,
+        age  : age  || pet.age,
+        kind : kind || pet.kind,
+      }
+      pets[index] = newPet;
     }
 
-    fs.writeFile('./pets.json', JSON.stringify(pets),function(err){
+    fs.writeFile('./pets.json', JSON.stringify(pets),(err) => {
       if(err){
         throw err;
         process.exit(1);
       }
       res.set('Content-Type', 'application/json');
       res.status(200);
-      res.send(pets[index]);
+      res.send(newPet);
     })
   })
 })
 
-
-
-app.delete('/pets/:id', function(req, res){
-  fs.readFile(petsPath, 'utf8', function(err, data){
+app.delete('/pets/:id', (req, res) => {
+  fs.readFile(petsPath, 'utf8', (err, data) => {
     if (err) {
       throw err;
       return res.sendStatus(500);
@@ -143,7 +161,7 @@ app.delete('/pets/:id', function(req, res){
       res.sendStatus(404);
     }
     let pet = pets.splice(id,1)[0];
-    fs.writeFile(petsPath, JSON.stringify(pets), function(err){
+    fs.writeFile(petsPath, JSON.stringify(pets), (err) => {
       if(err){
         throw err;
         process.exit(1);
@@ -156,14 +174,14 @@ app.delete('/pets/:id', function(req, res){
   })
 });
 
-  app.use(function (req, res,next) {
+  app.use( (req, res,next) => {
     res.contentType('text/plain');
     res.status(404);
     res.send('Not Found');
     next();
   })
 
-app.listen(port, function(){
+app.listen(port, () => {
   console.log('hello word');
 });
 
