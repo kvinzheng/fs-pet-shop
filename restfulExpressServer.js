@@ -16,11 +16,11 @@ app.use(morgan('dev'));
 
 let basicAuth = require('basic-auth');
 
-let auth = (req, res, next) => {
-   function unauthorized(res) {
-  //  res.set('Content-Type', 'text/plain')
+function auth(req, res, next){
+  function unauthorized(res) {
+    //  res.set('Content-Type', 'text/plain')
     res.set('WWW-Authenticate', 'Basic realm="Required"');
-    return res.send(401);
+    res.send(401);
   };
 
   let user = basicAuth(req);
@@ -36,36 +36,36 @@ let auth = (req, res, next) => {
   };
 };
 
-app.get('/pets', (req, res) => {
+app.get('/pets', auth, (req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if(err) {
       console.error(err);
       return res.sendStatus(500);
     }
-      let pets = JSON.parse(data);
-      res.status(200)
-      res.send(pets);
-    });
+    let pets = JSON.parse(data);
+    res.status(200)
+    res.send(pets);
+  });
 });
 
-app.get('/pets/:id', (req, res) => {
-    fs.readFile(petsPath, 'utf8', (err, data) => {
-      if (err) {
-        throw err;
-        return res.sendStatus(500);
-      }
+app.get('/pets/:id', auth, (req, res) => {
+  fs.readFile(petsPath, 'utf8', (err, data) => {
+    if (err) {
+      throw err;
+      return res.sendStatus(500);
+    }
 
-      let id = req.params.id;
-      let numberId = parseInt(id);
-      let pet = JSON.parse(data)[numberId];
+    let id = req.params.id;
+    let numberId = parseInt(id);
+    let pet = JSON.parse(data)[numberId];
 
-      if(pet){
-        res.set('Content-Type', 'application/json');
-        res.contentType('application/json');
-        res.status(200);
-        res.send(pet);
-      }
-      else if( numberId < 0 || numberId >= JSON.parse(data).length || Number.isNaN(numberId)){
+    if(pet){
+      res.set('Content-Type', 'application/json');
+      res.contentType('application/json');
+      res.status(200);
+      res.send(pet);
+    }
+    else if( numberId < 0 || numberId >= JSON.parse(data).length || Number.isNaN(numberId)){
       res.status(404);
       res.contentType("text/plain");
       res.send('Not Found');
@@ -73,7 +73,7 @@ app.get('/pets/:id', (req, res) => {
   });
 });
 
-app.post('/pets', function(req, res) {
+app.post('/pets', auth, function(req, res) {
   fs.readFile(petsPath, 'utf8', (err, data) => { //petsPath is a pets.JSON
     if (err) {
       console.error(err.stack);
@@ -103,10 +103,10 @@ app.post('/pets', function(req, res) {
       res.status(400);
       res.send('Bad Request');
     }
- });
+  });
 });
 
-app.patch('/pets/:index',function(req, res){
+app.patch('/pets/:index',auth,function(req, res){
   fs.readFile('./pets.json', 'utf8', (err, data) => {
     console.log('I am here');
     if(err){
@@ -146,7 +146,7 @@ app.patch('/pets/:index',function(req, res){
   })
 })
 
-app.delete('/pets/:id', (req, res) => {
+app.delete('/pets/:id', auth, (req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if (err) {
       throw err;
@@ -174,12 +174,12 @@ app.delete('/pets/:id', (req, res) => {
   })
 });
 
-  app.use( (req, res,next) => {
-    res.contentType('text/plain');
-    res.status(404);
-    res.send('Not Found');
-    next();
-  })
+app.use( (req, res,next) => {
+  res.contentType('text/plain');
+  res.status(404);
+  res.send('Not Found');
+  next();
+})
 
 app.listen(port, () => {
   console.log('hello word');
