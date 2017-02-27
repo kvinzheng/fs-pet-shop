@@ -79,6 +79,10 @@ app.post('/pets', function(req, res) {
       fs.writeFile('./pets.json', JSON.stringify(pets), function(err){
         //res.set('Content-Type', 'application/json');
         // console.log(' i am here');
+        if(err){
+          
+          throw err;
+        }
         console.log();
         res.status(200);
         res.json(newPet);

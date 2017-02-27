@@ -36,7 +36,11 @@ function auth(req, res, next){
   };
 };
 
-app.get('/pets', auth, (req, res) => {
+app.use(auth,(req, res, next) => {
+ next()
+})
+
+app.get('/pets', (req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if(err) {
       console.error(err);
@@ -48,7 +52,7 @@ app.get('/pets', auth, (req, res) => {
   });
 });
 
-app.get('/pets/:id', auth, (req, res) => {
+app.get('/pets/:id', (req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if (err) {
       throw err;
@@ -73,7 +77,7 @@ app.get('/pets/:id', auth, (req, res) => {
   });
 });
 
-app.post('/pets', auth, function(req, res) {
+app.post('/pets', function(req, res) {
   fs.readFile(petsPath, 'utf8', (err, data) => { //petsPath is a pets.JSON
     if (err) {
       console.error(err.stack);
@@ -106,7 +110,7 @@ app.post('/pets', auth, function(req, res) {
   });
 });
 
-app.patch('/pets/:index',auth,function(req, res){
+app.patch('/pets/:index',function(req, res){
   fs.readFile('./pets.json', 'utf8', (err, data) => {
     console.log('I am here');
     if(err){
@@ -146,12 +150,13 @@ app.patch('/pets/:index',auth,function(req, res){
   })
 })
 
-app.delete('/pets/:id', auth, (req, res) => {
+app.delete('/pets/:id',(req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if (err) {
       throw err;
       return res.sendStatus(500);
     }
+    catch(err);
 
     let id = req.params.id;
     let numberId = parseInt(id);
