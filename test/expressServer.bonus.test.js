@@ -84,7 +84,7 @@ describe('pets bonus expressServer', () => {
       request(app)
         .get('/blah')
         .expect('Content-Type', /text\/plain/)
-.expect(404, 'Not Found', done);
+.expect(404, all unauthorized requests, done);
     });
   });
 });
