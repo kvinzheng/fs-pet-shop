@@ -156,7 +156,6 @@ app.delete('/pets/:id',(req, res) => {
       throw err;
       return res.sendStatus(500);
     }
-    catch(err);
 
     let id = req.params.id;
     let numberId = parseInt(id);
