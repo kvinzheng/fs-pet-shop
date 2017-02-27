@@ -110,7 +110,7 @@ app.post('/pets', function(req, res) {
   });
 });
 
-app.patch('/pets/:index',function(req, res){
+app.patch('/pets/:index', auth, function(req, res){
   fs.readFile('./pets.json', 'utf8', (err, data) => {
     console.log('I am here');
     if(err){
