@@ -1,10 +1,8 @@
 var express = require('express');
-//console.log(express);
 var app = express();
-// console.log('this is app')
-// console.log(app);
 var fs = require('fs');
-var petsPath = './pets.json';
+var path = require('path');
+var petsPath = path.join(__dirname,'pets.json');
 var port = 7000;
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
@@ -24,7 +22,7 @@ app.get('/pets', function(req, res){
 
 app.get('/pets/:id', function(req, res){
     fs.readFile(petsPath, 'utf8', function(err, data) {
-      console.log(typeof data);
+      console.log( data);
       if (err) {
         throw err;
         return res.sendStatus(500);
@@ -74,16 +72,17 @@ app.post('/pets', function(req, res) {
     newPet.kind = kindBody;
     // console.log(newPet);
 
+    console.log('am i here');
+    console.log("what is add", newPet);
     if(nameBody && ageBody && kindBody){
       pets.push(newPet);
       fs.writeFile('./pets.json', JSON.stringify(pets), function(err){
         //res.set('Content-Type', 'application/json');
         // console.log(' i am here');
         if(err){
-          
+
           throw err;
         }
-        console.log();
         res.status(200);
         res.json(newPet);
       })

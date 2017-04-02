@@ -1,16 +1,16 @@
 let express = require('express');
 let app = express();
 let fs = require('fs');
-let petsPath = './pets.json';
+let path = require('path');
+let petsPath = path.join(__dirname,'pets.json');
+let morgan = require('morgan');
+let bodyParser = require('body-parser');
+let port = process.env.PORT || 6004;
 
 app.disable('x-powered-by');
-let port = process.env.PORT || 6000;
-
-let bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-let morgan = require('morgan');
 app.use(morgan('dev'));
 
 
@@ -36,9 +36,7 @@ function auth(req, res, next){
   };
 };
 
-app.use(auth,(req, res, next) => {
- next()
-})
+app.use(auth);
 
 app.get('/pets', (req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
@@ -96,7 +94,7 @@ app.post('/pets', function(req, res) {
 
     if(nameBody && ageBody && kindBody){
       pets.push(newPet);
-      fs.writeFile('./pets.json', JSON.stringify(pets), (err) => {
+      fs.writeFile(petsPath, JSON.stringify(pets), (err) => {
         res.set('Content-Type', 'application/json');
         res.status(200);
         res.send(newPet);
@@ -110,9 +108,9 @@ app.post('/pets', function(req, res) {
   });
 });
 
-app.patch('/pets/:index', auth, function(req, res){
-  fs.readFile('./pets.json', 'utf8', (err, data) => {
-    console.log('I am here');
+app.patch('/pets/:index', function(req, res){
+  fs.readFile(petsPath, 'utf8', (err, data) => {
+    // console.log('I am here');
     if(err){
       console.error(err.stack);
       res.sendStatus(500);
@@ -138,7 +136,7 @@ app.patch('/pets/:index', auth, function(req, res){
       pets[index] = newPet;
     }
 
-    fs.writeFile('./pets.json', JSON.stringify(pets),(err) => {
+    fs.writeFile(petsPath, JSON.stringify(pets),(err) => {
       if(err){
         throw err;
         process.exit(1);
@@ -172,7 +170,7 @@ app.delete('/pets/:id',(req, res) => {
       }
       res.set('Content-Type', 'application/json');
       res.status(200);
-      console.log('i am here');
+      // console.log('i am here');
       res.send(pet);
     });
   })
@@ -186,7 +184,7 @@ app.use( (req, res,next) => {
 })
 
 app.listen(port, () => {
-  console.log('hello word');
+  console.log('listening on port',port);
 });
 
 module.exports = app;

@@ -2,9 +2,10 @@
 'use strict';
 
 var fs = require('fs');
-var fsp = require('fs-promise');
+// var fsp = require('fs-promise');
 var path = require('path');
-var petsPath = './pets.json';
+var petsPath = path.join(__dirname,'pets.json');
+// console.log('what is process.argv',process.argv[0]);
 var node = path.basename(process.argv[0]);
 var file = path.basename(process.argv[1]);
 
@@ -12,7 +13,7 @@ var cmd = process.argv[2];
 
 if (cmd === 'read') {
   var indexR = process.argv[3];
-  fsp.readFile(petsPath, 'utf8', function(err, data) {
+  fs.readFile(petsPath, 'utf8', function(err, data) {
     if (err) {
       throw err;
       process.exit(1);
@@ -23,10 +24,11 @@ if (cmd === 'read') {
       console.log(pets);
     } else {
       var pets = JSON.parse(data);
-
+      // console.log('wat is pets',pets);
       if (pets[indexR] === undefined) {
         console.error(`Usage: ${node} ${file} ${cmd} INDEX`);
       } else {
+        // console.log('what is data',data);
         var pet = JSON.parse(data)[indexR];
         console.log(pet);
       }
