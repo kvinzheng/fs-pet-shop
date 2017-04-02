@@ -53,7 +53,7 @@ app.get('/pets', (req, res) => {
 app.get('/pets/:id', (req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if (err) {
-      throw err;
+       console.error(err.stack);
       return res.sendStatus(500);
     }
 
@@ -95,6 +95,10 @@ app.post('/pets', function(req, res) {
     if(nameBody && ageBody && kindBody){
       pets.push(newPet);
       fs.writeFile(petsPath, JSON.stringify(pets), (err) => {
+        if(err){
+          console.error(err.stack);
+          return res.sendStatus(500);
+        }
         res.set('Content-Type', 'application/json');
         res.status(200);
         res.send(newPet);
@@ -138,7 +142,8 @@ app.patch('/pets/:index', function(req, res){
 
     fs.writeFile(petsPath, JSON.stringify(pets),(err) => {
       if(err){
-        throw err;
+        console.error(err.stack);
+        return res.sendStatus(500);
         process.exit(1);
       }
       res.set('Content-Type', 'application/json');
@@ -151,8 +156,8 @@ app.patch('/pets/:index', function(req, res){
 app.delete('/pets/:id',(req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if (err) {
-      throw err;
-      return res.sendStatus(500);
+       console.error(err.stack);
+       return res.sendStatus(500);
     }
 
     let id = req.params.id;
@@ -165,7 +170,8 @@ app.delete('/pets/:id',(req, res) => {
     let pet = pets.splice(id,1)[0];
     fs.writeFile(petsPath, JSON.stringify(pets), (err) => {
       if(err){
-        throw err;
+        console.error(err.stack);
+        res.sendStatus(500);
         process.exit(1);
       }
       res.set('Content-Type', 'application/json');
@@ -176,7 +182,7 @@ app.delete('/pets/:id',(req, res) => {
   })
 });
 
-app.use( (req, res,next) => {
+app.use((req, res,next) => {
   res.contentType('text/plain');
   res.status(404);
   res.send('Not Found');
