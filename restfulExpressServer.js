@@ -1,17 +1,17 @@
-let express = require('express');
-let app = express();
-let fs = require('fs');
-let path = require('path');
-let petsPath = path.join(__dirname,'pets.json');
-let morgan = require('morgan');
-let bodyParser = require('body-parser');
-let port = process.env.PORT || 6004;
+const express = require('express');
+const app = express();
+const fs = require('fs');
+const path = require('path');
+const petsPath = path.join(__dirname,'pets.json');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const port = process.env.PORT || 6004;
 
 app.disable('x-powered-by');
+app.use(morgan('dev'));
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: false })); // support encoded bodies
 
-app.use(morgan('dev'));
 
 
 let basicAuth = require('basic-auth');
@@ -41,8 +41,9 @@ app.use(auth);
 app.get('/pets', (req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if(err) {
-      console.error(err);
-      return res.sendStatus(500);
+      return next(err);
+      // console.error(err);
+      // return res.sendStatus(500);
     }
     let pets = JSON.parse(data);
     res.status(200)
@@ -53,8 +54,9 @@ app.get('/pets', (req, res) => {
 app.get('/pets/:id', (req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if (err) {
-       console.error(err.stack);
-      return res.sendStatus(500);
+      return next(err);
+      //  console.error(err.stack);
+      // return res.sendStatus(500);
     }
 
     let id = req.params.id;
@@ -78,8 +80,9 @@ app.get('/pets/:id', (req, res) => {
 app.post('/pets', function(req, res) {
   fs.readFile(petsPath, 'utf8', (err, data) => { //petsPath is a pets.JSON
     if (err) {
-      console.error(err.stack);
-      return res.sendStatus(500);
+      return next(err);
+      // console.error(err.stack);
+      // return res.sendStatus(500);
     }
     let pets = JSON.parse(data);
 
@@ -96,8 +99,9 @@ app.post('/pets', function(req, res) {
       pets.push(newPet);
       fs.writeFile(petsPath, JSON.stringify(pets), (err) => {
         if(err){
-          console.error(err.stack);
-          return res.sendStatus(500);
+          return next(err);
+          // console.error(err.stack);
+          // return res.sendStatus(500);
         }
         res.set('Content-Type', 'application/json');
         res.status(200);
@@ -116,8 +120,9 @@ app.patch('/pets/:index', function(req, res){
   fs.readFile(petsPath, 'utf8', (err, data) => {
     // console.log('I am here');
     if(err){
-      console.error(err.stack);
-      res.sendStatus(500);
+      return next(err);
+      // console.error(err.stack);
+      // res.sendStatus(500);
     }
     let index  = req.params.index;
     let numberIndex = parseInt(index);
@@ -142,9 +147,10 @@ app.patch('/pets/:index', function(req, res){
 
     fs.writeFile(petsPath, JSON.stringify(pets),(err) => {
       if(err){
-        console.error(err.stack);
-        return res.sendStatus(500);
-        process.exit(1);
+        return next(err);
+        // console.error(err.stack);
+        // return res.sendStatus(500);
+        // process.exit(1);
       }
       res.set('Content-Type', 'application/json');
       res.status(200);
@@ -156,8 +162,9 @@ app.patch('/pets/:index', function(req, res){
 app.delete('/pets/:id',(req, res) => {
   fs.readFile(petsPath, 'utf8', (err, data) => {
     if (err) {
-       console.error(err.stack);
-       return res.sendStatus(500);
+      return next(err);
+      //  console.error(err.stack);
+      //  return res.sendStatus(500);
     }
 
     let id = req.params.id;
@@ -170,9 +177,10 @@ app.delete('/pets/:id',(req, res) => {
     let pet = pets.splice(id,1)[0];
     fs.writeFile(petsPath, JSON.stringify(pets), (err) => {
       if(err){
-        console.error(err.stack);
-        res.sendStatus(500);
-        process.exit(1);
+        return next(err);
+        // console.error(err.stack);
+        // res.sendStatus(500);
+        // process.exit(1);
       }
       res.set('Content-Type', 'application/json');
       res.status(200);
@@ -181,12 +189,16 @@ app.delete('/pets/:id',(req, res) => {
     });
   })
 });
+app.use((err, _req, res, _next) =>{
+  console.error(err.stack);
+  res.sendstatus(500);
+})
 
 app.use((req, res,next) => {
   res.contentType('text/plain');
   res.status(404);
   res.send('Not Found');
-  next();
+  // next();
 })
 
 app.listen(port, () => {
